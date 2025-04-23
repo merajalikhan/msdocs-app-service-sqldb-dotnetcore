@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4 
         with: 
           name: migrationsbundle 
-          path: ./migrationsbundle
+          path: ${{env.DOTNET_ROOT}}/myapp/migrationsbundle
           
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4

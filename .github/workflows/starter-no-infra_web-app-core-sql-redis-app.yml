@@ -90,6 +90,6 @@ jobs:
       - name: Migrate Database 
         shell: bash 
         run: |  
-          chmod +x .artifacts/migrationsbundle/migrationsbundle
-          .artifacts/migrationsbundle/migrationsbundle --connection   "${{env.DBCONNECTION}}"
+          chmod +x .artifacts/migrationsbundle
+          .artifacts/migrationsbundle --connection   "${{env.DBCONNECTION}}"
           

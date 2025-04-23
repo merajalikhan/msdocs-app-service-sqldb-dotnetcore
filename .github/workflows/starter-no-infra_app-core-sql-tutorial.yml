@@ -32,8 +32,20 @@ jobs:
       - name: install dotnet ef
         run: dotnet tool install --global dotnet-ef --version 8.*
 
-      - name: Create migration bundle
-        run: dotnet ef migrations bundle --runtime linux-x64 -o ${{env.DOTNET_ROOT}}/myapp/migrationbundle 
+      #- name: Create migration bundle
+      #  run: dotnet ef migrations bundle -r linux-x64 \-o ${{env.DOTNET_ROOT}} /myapp/migrationsbundle 
+
+      - name: Bundle EF Migrations 
+        run: | 
+          dotnet ef migrations bundle \ 
+          -r linux-x64 \ 
+          --project ${{ env.API_PROJECT_NAME }} 
+
+      - name: Upload EF Migrations Bundle Artifact 
+        uses: actions/upload-artifact@v4 
+        with: 
+          name: efbundle 
+          path: ./efbundle 
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -57,6 +69,12 @@ jobs:
         with:
           name: .net-app
       
+      - name: Download EF Bundle Artifact 
+        uses: actions/download-artifact@v4 
+        with: 
+          name: efbundle 
+          path: artifacts/efbundle
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -71,4 +89,9 @@ jobs:
           app-name: 'app-core-sql-tutorial'
           slot-name: 'Production'
           package: .
-          
+
+      - name: Migrate Database 
+        shell: bash 
+        run: |  
+          chmod +x ./artifacts/efbundle/efbundle 
+          ./artifacts/efbundle/efbundle --connection "${{ inputs.database-connectionstring }}"  

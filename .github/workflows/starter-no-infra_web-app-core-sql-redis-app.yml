@@ -29,21 +29,6 @@ jobs:
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
-      - name: install dotnet ef
-        run: dotnet tool install --global dotnet-ef --version 8.*
-
-      - name: Create migration bundle
-        run: dotnet ef migrations bundle --runtime linux-x64 -o ${{env.DOTNET_ROOT}}/myapp/migrationsbundle 
-      
-      #- name: Bundle EF Migrations 
-      #  run:  dotnet ef migrations bundle  --runtime linux-x64 --project ${{ env.API_PROJECT_NAME }} 
-
-      - name: Upload EF Migrations Bundle Artifact 
-        uses: actions/upload-artifact@v4 
-        with: 
-          name: migrationsbundle 
-          path: ${{env.DOTNET_ROOT}}/myapp/migrationsbundle
-          
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -66,18 +51,12 @@ jobs:
         with:
           name: .net-app
       
-      - name: Download EF Bundle Artifact 
-        uses: actions/download-artifact@v4 
-        with: 
-          name: migrationsbundle 
-          path: artifacts/migrationsbundle
-          
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F42DB814BE254539AEA889D49F969426 }}
-          tenant-id: "8f9b88a7-3f3e-4be3-aae4-2006d4c42306" #${{ secrets.AZUREAPPSERVICE_TENANTID_6C0CB8D246174856B64344E7CC6D76D9 }}
-          subscription-id: "3ee425a1-2fc7-40e0-bbfc-8d93486240a8" #${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0D78291832D747F0B759CAA23C078183 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_71705425955F45F0A2AE4A12469DC8D8 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3FF6DC8DAEB94AC7A2E7B1B76989BE43 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_17E332778FF047CAB7EB36E6DE8285DA }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -86,10 +65,4 @@ jobs:
           app-name: 'web-app-core-sql-redis-app'
           slot-name: 'Production'
           package: .
-          
-      - name: Migrate Database 
-        shell: bash 
-        run: |  
-          chmod +x .artifacts/migrationsbundle
-          .artifacts/migrationsbundle --connection   "${{env.DBCONNECTION}}"
           
